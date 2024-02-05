@@ -13,14 +13,14 @@ class GameState:
         # - lower case (b/w) as color
         # - upper case (R,N,B,Q,K or P) as piece name
         # in case the cell is empty then we store '--'
-        self.board = [['bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR'],
-                      ['bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP'],
-                      ['--', '--', '--', '--', '--', '--', '--', '--'],
-                      ['--', '--', '--', '--', '--', '--', '--', '--'],
-                      ['--', '--', '--', '--', '--', '--', '--', '--'],
-                      ['--', '--', '--', '--', '--', '--', '--', '--'],
-                      ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
-                      ['wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR']]
+        self.board = [['bR', 'bN', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bB', 'bN', 'bR'],
+					  ['bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP'],
+					  ['--', '--', '--', '--', '--', '--', '--', '--', '--', '--'],
+					  ['--', '--', '--', '--', '--', '--', '--', '--', '--', '--'],
+					  ['--', '--', '--', '--', '--', '--', '--', '--', '--', '--'],
+					  ['--', '--', '--', '--', '--', '--', '--', '--', '--', '--'],
+					  ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
+					  ['wR', 'wN', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wB', 'wN', 'wR']]
 
         self.moveFunctions = {'P': self.getPawnMoves, 'R': self.getRookMoves, 'N': self.getKnightMoves,
                               'B': self.getBishopMoves, 'Q': self.getQueenMoves, 'K': self.getKingMoves}

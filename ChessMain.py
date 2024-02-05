@@ -13,9 +13,12 @@ else:
 import ChessBot
 p.init()
 
-WIDTH = HEIGHT = 480
-DIMENTION = 8	 # 8*8 CHESS BOARD
-SQ_SIZE = HEIGHT // DIMENTION
+WIDTH = 1000
+HEIGHT = 800
+DIMENTION_WIDTH = 10	 # 8*8 CHESS BOARD
+DIMENTION_HEIGHT = 8
+SQ_SIZE_WIDTH = WIDTH // DIMENTION_WIDTH
+SQ_SIZE_HEIGHT = HEIGHT // DIMENTION_HEIGHT
 MAX_FPS = 15
 IMAGES = {}
  
@@ -25,7 +28,7 @@ Initialise the global dictionary of images. This will be called exactly once in 
 def loadImages():
 	pieces = ['bP', 'bR', 'bN', 'bB', 'bQ', 'bK', 'wP', 'wR', 'wN', 'wB', 'wQ', 'wK']
 	for piece in pieces:
-		IMAGES[piece] = p.transform.scale(p.image.load("assets/images/" + piece + ".png"), (SQ_SIZE, SQ_SIZE))
+		IMAGES[piece] = p.transform.scale(p.image.load("assets/images/" + piece + ".png"), (SQ_SIZE_WIDTH, SQ_SIZE_HEIGHT))
 	# Note: We can access a piece by saying IMAGES['wP'] -> will give white pawn; 
  
 '''
@@ -55,8 +58,8 @@ def main():
 			elif e.type == p.MOUSEBUTTONDOWN:
 				if not gameOver and humanTurn:
 					location = p.mouse.get_pos()	 # (x,y) position of mouse
-					col = location[0]//SQ_SIZE
-					row = location[1]//SQ_SIZE
+					col = location[0]//SQ_SIZE_WIDTH
+					row = location[1]//SQ_SIZE_HEIGHT
 					if sqSelected == (row, col): 	# user selected the same sq. twice -> deselect the selecion
 						sqSelected = ()
 						playerClicks = []
@@ -130,10 +133,10 @@ def highlightSquares(screen, gs, selectedSquare, validMoves):
 		allyColor = 'w' if gs.whiteToMove else 'b'
 		if gs.board[r][c][0] == allyColor:
 			#Highlighting the selected Square
-			s = p.Surface((SQ_SIZE, SQ_SIZE))
+			s = p.Surface((SQ_SIZE_WIDTH, SQ_SIZE_HEIGHT))
 			s.set_alpha(100)		# transparency value -> 0 : 100% transparent | 255 : 100% Opaque
 			s.fill(p.Color('blue'))
-			screen.blit(s, (c*SQ_SIZE, r*SQ_SIZE))
+			screen.blit(s, (c*SQ_SIZE_WIDTH, r*SQ_SIZE_HEIGHT))
 
 			#Highlighting the valid move squares
 			s.fill(p.Color('yellow'))
@@ -142,7 +145,7 @@ def highlightSquares(screen, gs, selectedSquare, validMoves):
 					endRow = move.endRow
 					endCol = move.endCol
 					if gs.board[endRow][endCol] == '--' or gs.board[endRow][endCol][0] == enemyColor:
-						screen.blit(s, (endCol * SQ_SIZE, endRow * SQ_SIZE))
+						screen.blit(s, (endCol * SQ_SIZE_WIDTH, endRow * SQ_SIZE_HEIGHT))
 
 
 '''
@@ -160,10 +163,10 @@ draw the squares on the board
 def drawBoard(screen):
 	global colors
 	colors = [p.Color(235, 235, 208), p.Color(119, 148, 85)]
-	for r in range(DIMENTION):
-		for c in range(DIMENTION):
+	for r in range(DIMENTION_HEIGHT):
+		for c in range(DIMENTION_WIDTH):
 			color = colors[(r+c)%2]
-			p.draw.rect(screen, color, p.Rect(SQ_SIZE*c, SQ_SIZE*r , SQ_SIZE, SQ_SIZE))
+			p.draw.rect(screen, color, p.Rect(SQ_SIZE_HEIGHT*c, SQ_SIZE_WIDTH*r , SQ_SIZE_HEIGHT, SQ_SIZE_WIDTH))
 
 
 
@@ -171,11 +174,13 @@ def drawBoard(screen):
 draw the pieces on the board using ChessEngine.GameState.board.
 '''
 def drawPieces(screen, board):
-	for r in range(DIMENTION):
-		for c in range(DIMENTION):
+	for r in range(DIMENTION_HEIGHT):
+		for c in range(DIMENTION_WIDTH):
+			print(r, c)
 			piece = board[r][c]
+			print(piece)
 			if piece != '--':
-				screen.blit(IMAGES[piece], p.Rect(SQ_SIZE*c, SQ_SIZE*r , SQ_SIZE, SQ_SIZE))
+				screen.blit(IMAGES[piece], p.Rect(SQ_SIZE_WIDTH*c, SQ_SIZE_HEIGHT*r , SQ_SIZE_WIDTH, SQ_SIZE_HEIGHT))
 
 
 '''
@@ -193,13 +198,13 @@ def animateMove(move, screen, board, clock):
 		drawPieces(screen, board)
 		#erase piece from endRow, endCol
 		color = colors[(move.endRow + move.endCol) % 2]
-		endSqaure = p.Rect(move.endCol * SQ_SIZE, move.endRow * SQ_SIZE, SQ_SIZE, SQ_SIZE)
+		endSqaure = p.Rect(move.endCol * SQ_SIZE_WIDTH, move.endRow * SQ_SIZE_HEIGHT, SQ_SIZE_WIDTH, SQ_SIZE_HEIGHT)
 		p.draw.rect(screen, color, endSqaure)
 		#draw captured piece back
 		# if move.pieceCaptured != '--':
 			# screen.blit(IMAGES[move.pzieceCaptured], endSqaure)
 		#draw moving piece
-		screen.blit(IMAGES[move.pieceMoved], p.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
+		screen.blit(IMAGES[move.pieceMoved], p.Rect(c*SQ_SIZE_WIDTH, r*SQ_SIZE_HEIGHT, SQ_SIZE_WIDTH, SQ_SIZE_HEIGHT))
 		p.display.flip()
 		clock.tick(60)
 
