@@ -1,1 +1,1 @@
-# ChessProject
+#### These files contains the code of a chess game against a BOT which chooses a move at random from a list of valid moves.
