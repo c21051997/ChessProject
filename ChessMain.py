@@ -26,11 +26,14 @@ IMAGES = {}
 Initialise the global dictionary of images. This will be called exactly once in the main
 '''
 def loadImages():
-	pieces = ['bP', 'bR', 'bN', 'bB', 'bQ', 'bK', 'wP', 'wR', 'wN', 'wB', 'wQ', 'wK']
+	pieces = ['bP', 'bR', 'bN', 'bC', 'bA', 'bB', 'bQ', 'bK', 'wP', 'wR', 'wN', 'wC', 'wA', 'wB', 'wQ', 'wK']
 	for piece in pieces:
 		IMAGES[piece] = p.transform.scale(p.image.load("assets/images/" + piece + ".png"), (SQ_SIZE_WIDTH, SQ_SIZE_HEIGHT))
 	# Note: We can access a piece by saying IMAGES['wP'] -> will give white pawn; 
- 
+
+def displayMenu(screen):
+	screen.fill(p.Color('white'))
+
 '''
 This will be out main driver. It will handle user input and update the graphics.
 '''
@@ -213,12 +216,10 @@ To wrtie some text in the middle of the screen!
 '''
 def drawText(screen, text):
 						#  Font Name  Size Bold  Italics
-	font = p.font.SysFont("Helvitica", 32, True, False);
+	font = p.font.SysFont("Helvitica", 32, True, False)
 	textObject = font.render(text, 0, p.Color('Blue'))
 	textLocation = p.Rect(0, 0, WIDTH, HEIGHT).move(WIDTH/2 - textObject.get_width()/2, HEIGHT/2 - textObject.get_height()/2)
 	screen.blit(textObject, textLocation)
-
-
 
 if __name__ == '__main__':
 	main()

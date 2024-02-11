@@ -13,17 +13,18 @@ class GameState:
         # - lower case (b/w) as color
         # - upper case (R,N,B,Q,K or P) as piece name
         # in case the cell is empty then we store '--'
-        self.board = [['bR', 'bN', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bB', 'bN', 'bR'],
+        self.board = [['bR', 'bN', 'bA', 'bB', 'bQ', 'bK', 'bB', 'bC', 'bN', 'bR'],
 					  ['bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP'],
 					  ['--', '--', '--', '--', '--', '--', '--', '--', '--', '--'],
 					  ['--', '--', '--', '--', '--', '--', '--', '--', '--', '--'],
 					  ['--', '--', '--', '--', '--', '--', '--', '--', '--', '--'],
 					  ['--', '--', '--', '--', '--', '--', '--', '--', '--', '--'],
 					  ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
-					  ['wR', 'wN', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wB', 'wN', 'wR']]
+					  ['wR', 'wN', 'wA', 'wB', 'wQ', 'wK', 'wB', 'wC', 'wN', 'wR']]
 
         self.moveFunctions = {'P': self.getPawnMoves, 'R': self.getRookMoves, 'N': self.getKnightMoves,
-                              'B': self.getBishopMoves, 'Q': self.getQueenMoves, 'K': self.getKingMoves}
+                              'B': self.getBishopMoves, 'Q': self.getQueenMoves, 'K': self.getKingMoves, 
+                              'A': self.getArchbishopMoves, 'C': self.getChancellorMoves}
         self.whiteToMove = True
         self.moveLog = []
         # Keeping track of kings to make valid move calculation and castling easier.
@@ -73,13 +74,16 @@ class GameState:
         else:
             self.enPassantPossible = ()
 
+        '''
+        CHANGE THIS
+        '''
         # castle Move
         if move.isCastleMove:
             if move.endCol < move.startCol:  # Queen side castle
                 self.board[move.endRow][0] = '--'
                 self.board[move.endRow][move.endCol + 1] = move.pieceMoved[0] + 'R'
             else:  # King side castle
-                self.board[move.endRow][7] = '--'
+                self.board[move.endRow][9] = '--'
                 self.board[move.endRow][move.endCol - 1] = move.pieceMoved[0] + 'R'
 
         # Update 7. Castling Rights
@@ -126,6 +130,12 @@ class GameState:
         self.currentCastlingRights.bks = self.castleRightsLog[-1].bks  # update current castling right
         self.currentCastlingRights.bqs = self.castleRightsLog[-1].bqs  # update current castling right
 
+
+        '''
+        
+        MAYBE CHANGE THIS
+
+        '''
         # UNDO CASTLING MOVE:
         if move.isCastleMove:
             if move.endCol < move.startCol:  # Queen Side Castle
@@ -151,13 +161,13 @@ class GameState:
         elif move.pieceMoved == 'wR':
             if move.startRow == 7 and move.startCol == 0:
                 self.currentCastlingRights.wqs = False
-            if move.startRow == 7 and move.startCol == 7:
+            if move.startRow == 7 and move.startCol == 9:
                 self.currentCastlingRights.wks = False
 
         elif move.pieceMoved == 'bR':
             if move.startRow == 0 and move.startCol == 0:
                 self.currentCastlingRights.bqs = False
-            if move.startRow == 0 and move.startCol == 7:
+            if move.startRow == 0 and move.startCol == 9:
                 self.currentCastlingRights.bks = False
 
     ''' 
@@ -337,7 +347,7 @@ class GameState:
         directions = ((-1, 0), (1, 0), (0, -1), (0, 1))  # up down left right
         enemyColor = 'b' if self.whiteToMove else 'w'  # opponenet's color according to current turn
         for d in directions:
-            for i in range(1, 8):
+            for i in range(1, 10):
                 endRow = r + (d[0] * i)
                 endCol = c + (d[1] * i)
                 if endRow >= 0 and endRow < len(self.board) and endCol >= 0 and endCol < len(self.board[endRow]):
@@ -374,7 +384,7 @@ class GameState:
         directions = ((-1, -1), (-1, 1), (1, -1), (1, 1))  # (top left) (top right) (bottom left) (bottom right)
         enemyColor = 'b' if self.whiteToMove else 'w'  # opponenet's color according to current turn
         for d in directions:
-            for i in range(1, 8):
+            for i in range(1, 10):
                 endRow = r + (d[0] * i)
                 endCol = c + (d[1] * i)
                 if endRow >= 0 and endRow < len(self.board) and endCol >= 0 and endCol < len(self.board[endRow]):
@@ -410,6 +420,14 @@ class GameState:
                 endPiece = self.board[endRow][endCol]
                 if endPiece[0] != allyColor:
                     moves.append(Move((r, c), (endRow, endCol), self.board))
+    
+    def getArchbishopMoves(self, r, c, moves):
+        self.getBishopMoves(r, c, moves)
+        self.getKnightMoves(r, c, moves)
+
+    def getChancellorMoves(self, r, c, moves):
+        self.getRookMoves(r, c, moves)
+        self.getKnightMoves(r, c, moves)
 
     '''
 	Gets the list of all of the king's castling move -> for the king at(r,c);
@@ -427,15 +445,24 @@ class GameState:
                 (not self.whiteToMove and self.currentCastlingRights.bqs):
             self.getQueenSideCastleMoves(r, c, moves)
 
+    '''
+
+    CHANGE THIS FOR CORRECT CASTLING
+    > GET POSITION OF KING / ROOK
+    > SEE IF NO PIECES ARE BETWEEN
+    > SEE IF PIECES HAVENT BEEN MOVES
+
+    '''
+
     def getKingSideCastleMoves(self, r, c, moves):
-        if self.board[r][c + 1] == '--' and self.board[r][c + 2] == '--':
-            if not self.isUnderAttack(r, c + 1) and not self.isUnderAttack(r, c + 2):
-                moves.append(Move((r, c), (r, c + 2), self.board, isCastleMove=True))
+        if self.board[r][c + 1] == '--' and self.board[r][c + 2] == '--' and self.board[r][c + 3] == '--':
+            if not self.isUnderAttack(r, c + 1) and not self.isUnderAttack(r, c + 2) and not self.isUnderAttack(r, c + 3):
+                moves.append(Move((r, c), (r, c + 3), self.board, isCastleMove=True))
 
     def getQueenSideCastleMoves(self, r, c, moves):
-        if self.board[r][c - 1] == '--' and self.board[r][c - 2] == '--' and self.board[r][c - 3] == '--':
-            if not self.isUnderAttack(r, c - 1) and not self.isUnderAttack(r, c - 2):
-                moves.append(Move((r, c), (r, c - 2), self.board, isCastleMove=True))
+        if self.board[r][c - 1] == '--' and self.board[r][c - 2] == '--' and self.board[r][c - 3] == '--' and self.board[r][c - 4] == '--':
+            if not self.isUnderAttack(r, c - 1) and not self.isUnderAttack(r, c - 2) and not self.isUnderAttack(r, c - 3):
+                moves.append(Move((r, c), (r, c - 3), self.board, isCastleMove=True))
 
 
 class CastleRights:
@@ -461,7 +488,8 @@ class Move:
                    "5": 3, "6": 2, "7": 1, "8": 0}
     rowsToRanks = {v: k for k, v in ranksToRows.items()}
     filesToCols = {"a": 0, "b": 1, "c": 2, "d": 3,
-                   "e": 4, "f": 5, "g": 6, "h": 7}
+                   "e": 4, "f": 5, "g": 6, "h": 7,
+                   "i": 8, "j":9}
     colsToFiles = {v: k for k, v in filesToCols.items()}
 
     def __init__(self, startSq, endSq, board, isEnPassantMove=False, isCastleMove=False):
