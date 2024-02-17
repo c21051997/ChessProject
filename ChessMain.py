@@ -21,6 +21,9 @@ SQ_SIZE_WIDTH = WIDTH // DIMENTION_WIDTH
 SQ_SIZE_HEIGHT = HEIGHT // DIMENTION_HEIGHT
 MAX_FPS = 15
 IMAGES = {}
+
+WHITE_BUTTON = p.image.load("assets/images/white.png")
+BLACK_BUTTON = p.image.load("assets/images/black.png")
  
 '''
 Initialise the global dictionary of images. This will be called exactly once in the main
@@ -31,8 +34,6 @@ def loadImages():
 		IMAGES[piece] = p.transform.scale(p.image.load("assets/images/" + piece + ".png"), (SQ_SIZE_WIDTH, SQ_SIZE_HEIGHT))
 	# Note: We can access a piece by saying IMAGES['wP'] -> will give white pawn; 
 
-def displayMenu(screen):
-	screen.fill(p.Color('white'))
 
 '''
 This will be out main driver. It will handle user input and update the graphics.
@@ -52,7 +53,11 @@ def main():
 	playerOne = True					# if Human is playing white -> this will be true
 	playerTwo = False					# if Human is playing black -> this will be true
 	gameOver = False					# True in case of Checkmate and Stalemate
+
+	showMenu = True
+
 	while running:
+		
 		humanTurn = not (gs.whiteToMove ^ playerOne)
 		for e in p.event.get():
 			if e.type == p.QUIT:
@@ -71,7 +76,9 @@ def main():
 						playerClicks.append(sqSelected)	 # append for both 1st and 2nd click
 						if len(playerClicks) == 2: 	# when 2nd click
 							move = ChessEngine.Move(playerClicks[0],playerClicks[1], gs.board)
+							
 							for i in range(len(validMoves)):
+
 								if move == validMoves[i]:
 									gs.makeMove(validMoves[i])
 									moveMade = True
@@ -80,8 +87,6 @@ def main():
 									sqSelected = () 	# reset user clicks
 							if not moveMade:
 								playerClicks = [sqSelected]
-
-
 
 			#KEY HANDLERS
 			elif e.type == p.KEYDOWN:
@@ -147,8 +152,8 @@ def highlightSquares(screen, gs, selectedSquare, validMoves):
 				if move.startRow == r and move.startCol == c:
 					endRow = move.endRow
 					endCol = move.endCol
-					if gs.board[endRow][endCol] == '--' or gs.board[endRow][endCol][0] == enemyColor:
-						screen.blit(s, (endCol * SQ_SIZE_WIDTH, endRow * SQ_SIZE_HEIGHT))
+					#if gs.board[endRow][endCol] == '--' or gs.board[endRow][endCol][0] == enemyColor:
+					screen.blit(s, (endCol * SQ_SIZE_WIDTH, endRow * SQ_SIZE_HEIGHT))
 
 
 '''
@@ -179,9 +184,7 @@ draw the pieces on the board using ChessEngine.GameState.board.
 def drawPieces(screen, board):
 	for r in range(DIMENTION_HEIGHT):
 		for c in range(DIMENTION_WIDTH):
-			print(r, c)
 			piece = board[r][c]
-			print(piece)
 			if piece != '--':
 				screen.blit(IMAGES[piece], p.Rect(SQ_SIZE_WIDTH*c, SQ_SIZE_HEIGHT*r , SQ_SIZE_WIDTH, SQ_SIZE_HEIGHT))
 
