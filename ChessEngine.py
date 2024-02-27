@@ -22,6 +22,25 @@ class GameState:
 					  ['--', '--', '--', '--', '--', '--', '--', '--', '--', '--'],
 					  ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
 					  whitePosition]
+        """
+        self.board = [['bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR'],
+                      ['bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP'],
+                      ['--', '--', '--', '--', '--', '--', '--', '--'],
+                      ['--', '--', '--', '--', '--', '--', '--', '--'],
+                      ['--', '--', '--', '--', '--', '--', '--', '--'],
+                      ['--', '--', '--', '--', '--', '--', '--', '--'],
+                      ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
+                      ['wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR']]"""
+        """
+        self.board = [['bR', 'bN', 'bA', 'bB', 'bQ', 'bK', 'bB', 'bC', 'bN', 'bR'],
+                      ['bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP'],
+                      ['--', '--', '--', '--', '--', '--', '--', '--', '--', '--'],
+                      ['--', '--', '--', '--', '--', '--', '--', '--', '--', '--'],
+                      ['--', '--', '--', '--', '--', '--', '--', '--', '--', '--'],
+                      ['--', '--', '--', '--', '--', '--', '--', '--', '--', '--'],
+                      ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
+                      ['wR', 'wN', 'wA', 'wB', 'wQ', 'wK', 'wB', 'wC', 'wN', 'wR']]
+        """
 
         self.moveFunctions = {'P': self.getPawnMoves, 'R': self.getRookMoves, 'N': self.getKnightMoves,
                               'B': self.getBishopMoves, 'Q': self.getQueenMoves, 'K': self.getKingMoves, 
@@ -55,11 +74,11 @@ class GameState:
 	'''
     def startingPosition(self):
                 
-        columns = [0,1,2,3,4,5,6,7,8,9]
+        columns = list(range(10))
 
         #Random king postion, not on either edge as rooks must be either side
         kingPosition = random.randrange(1,9) 
-        #kingPosition = 2
+        #kingPosition = 8
         columns.remove(kingPosition)
         #Random rook position either side of the king
         queenRookPosition = random.randrange(0, kingPosition)
@@ -73,6 +92,7 @@ class GameState:
         blackSquare = False
         bishopOnePosition = random.choice(columns)
         columns.remove(bishopOnePosition)
+        
         if bishopOnePosition % 2 == 0:
             whiteSquare = True
         while not(blackSquare):
@@ -115,13 +135,6 @@ class GameState:
         whitePosition = [whitePieces.get(i) for i in range(10)]
         blackPosition = [blackPieces.get(i) for i in range(10)]
         return whitePosition, blackPosition, kingPosition, queenRookPosition, kingRookPosition
-
-    """def checkCastleMove(self, startSq, endSq):
-        if startSq[0] == endSq[0]:
-            if startSq[1] == self.kingPosition:
-                if endSq[1] == self.kingRookPosition or endSq[1] == self.queenRookPosition:
-                    return True
-        return False"""
 
     def makeMove(self, move):
 
@@ -296,13 +309,13 @@ class GameState:
             self.undoMove()
         # 5) Return the final list of moves
         if len(moves) == 0:
-            if self.inCheck():
+            """if self.inCheck():
                 print("CHECK MATE! " + ('white' if not self.whiteToMove else 'black') + " wins")
 
                 self.checkMate = True
             else:
                 print("DRAW DUE TO STALEMATE")
-                self.staleMate = True
+                self.staleMate = True"""
         else:
             self.checkMate = False
             self.staleMate = False
@@ -515,7 +528,6 @@ class GameState:
         difference = abs(c - 8)
 
         for i in range(1, difference + 1):
-            print(self.board[r][c + i][1])
 
             if ((self.board[r][c + i] == '--') or (self.board[r][c + i][1] == 'R')) and not self.isUnderAttack(r, c + i):
                 castlePermission = True
@@ -528,9 +540,9 @@ class GameState:
                 # the square is empty or there is a rook on there
                 castlePermission == True
         if c == 8:
-            if (self.board[r][7] == '--') and (self.board[r][7][1] == 'R'):
-            # If the King is on the Castle Square (Column 9) then allow rook to move to column 7
-            # This imitates castling movement
+            if (self.board[r][7] == '--') and (self.board[r][9][1] == 'R'):
+                # If the King is on the Castle Square (Column 9) then allow rook to move to column 7
+                # This imitates castling movement
                 moves.append(Move((r, 9), (r, 7), self.board))
             
         if castlePermission == True:
@@ -666,16 +678,4 @@ class Move:
     def __eq__(self, other):
         return isinstance(other, Move) and self.moveId == other.moveId
 
-class Castling:
-    def __init__(self, kingPosition, kingRookPosition, queenRookPosition):
-        self.kingPosition = kingPosition
-        self.kingRookPosition = kingRookPosition
-        self.queenRookPosition = queenRookPosition
-
-    def checkCastleMove(self, startSq, endSq):
-        if startSq[0] == endSq[0]:
-            if startSq[1] == self.kingPosition:
-                if endSq[1] == self.kingRookPosition or endSq[1] == self.queenRookPosition:
-                    return True
-        return False
     

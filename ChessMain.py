@@ -11,6 +11,7 @@ if len(sys.argv) > 1 and (sys.argv[1]).lower() == 'adv':
 else:
 	import ChessEngine
 import ChessBot
+import MediumBot
 p.init()
 
 WIDTH = 1000
@@ -33,7 +34,21 @@ def loadImages():
 	for piece in pieces:
 		IMAGES[piece] = p.transform.scale(p.image.load("assets/images/" + piece + ".png"), (SQ_SIZE_WIDTH, SQ_SIZE_HEIGHT))
 	# Note: We can access a piece by saying IMAGES['wP'] -> will give white pawn; 
+"""
+def displayMenu(screen):
+	
+	screen.blit(WHITE_BUTTON, (250, 50))
+	screen.blit(BLACK_BUTTON, (250, 250))
 
+def checkButtonClick(pos, buttonName):
+	button = None
+	if buttonName == WHITE_BUTTON:
+		button = buttonName.get_rect(topleft = (250, 50)) 
+	else:
+		button = buttonName.get_rect(topleft = (250, 250))
+	return button.collidepoint(pos)
+
+"""
 
 '''
 This will be out main driver. It will handle user input and update the graphics.
@@ -53,11 +68,26 @@ def main():
 	playerOne = True					# if Human is playing white -> this will be true
 	playerTwo = False					# if Human is playing black -> this will be true
 	gameOver = False					# True in case of Checkmate and Stalemate
-
+	"""
 	showMenu = True
-
+	while showMenu:
+		screen.fill(p.Color(112,128,144))
+		displayMenu(screen)
+		for e in p.event.get():
+			if e.type == p.QUIT:
+				showMenu = False
+			elif e.type == p.MOUSEBUTTONDOWN:
+				pos = p.mouse.get_pos()
+				if checkButtonClick(pos, WHITE_BUTTON):
+					showMenu = False
+				elif checkButtonClick(pos, BLACK_BUTTON):
+					showMenu = False
+	"""
 	while running:
-		
+		"""print("")
+		print("For depth 4 the total moves are: ", ChessBot.MoveGenerationTest(gs, 4))
+		print("")
+		running = False"""
 		humanTurn = not (gs.whiteToMove ^ playerOne)
 		for e in p.event.get():
 			if e.type == p.QUIT:
@@ -104,7 +134,10 @@ def main():
 
 		# AI Move finder logic
 		if not gameOver and not humanTurn:
-			AIMove = ChessBot.findRandomMove(validMoves)
+			AIMove = MediumBot.findBestMove(gs)
+
+			if AIMove is None:
+				AIMove = MediumBot.randomMove(validMoves)
 			gs.makeMove(AIMove)
 			moveMade = True
 			animate = True
