@@ -31,16 +31,16 @@ class GameState:
                       ['--', '--', '--', '--', '--', '--', '--', '--'],
                       ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
                       ['wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR']]"""
-        """
-        self.board = [['bR', 'bN', 'bA', 'bB', 'bQ', 'bK', 'bB', 'bC', 'bN', 'bR'],
+        
+        """self.board = [['bR', 'bN', 'bA', 'bB', 'bQ', 'bK', 'bB', 'bC', 'bN', 'bR'],
                       ['bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP'],
                       ['--', '--', '--', '--', '--', '--', '--', '--', '--', '--'],
                       ['--', '--', '--', '--', '--', '--', '--', '--', '--', '--'],
                       ['--', '--', '--', '--', '--', '--', '--', '--', '--', '--'],
                       ['--', '--', '--', '--', '--', '--', '--', '--', '--', '--'],
                       ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
-                      ['wR', 'wN', 'wA', 'wB', 'wQ', 'wK', 'wB', 'wC', 'wN', 'wR']]
-        """
+                      ['wR', 'wN', 'wA', 'wB', 'wQ', 'wK', 'wB', 'wC', 'wN', 'wR']]"""
+        
 
         self.moveFunctions = {'P': self.getPawnMoves, 'R': self.getRookMoves, 'N': self.getKnightMoves,
                               'B': self.getBishopMoves, 'Q': self.getQueenMoves, 'K': self.getKingMoves, 
@@ -78,21 +78,23 @@ class GameState:
 
         #Random king postion, not on either edge as rooks must be either side
         kingPosition = random.randrange(1,9) 
-        #kingPosition = 8
+        #kingPosition = 3
+
         columns.remove(kingPosition)
+
         #Random rook position either side of the king
         queenRookPosition = random.randrange(0, kingPosition)
-        #queenRookPosition = 0
         kingRookPosition = random.randrange(kingPosition + 1, 10)
-        #kingRookPosition = 2
+
         columns.remove(queenRookPosition)
         columns.remove(kingRookPosition)
 
+        #White Square Bishop and Black Sqaure Bishop
         whiteSquare = False
         blackSquare = False
         bishopOnePosition = random.choice(columns)
         columns.remove(bishopOnePosition)
-        
+
         if bishopOnePosition % 2 == 0:
             whiteSquare = True
         while not(blackSquare):
@@ -172,20 +174,20 @@ class GameState:
         #if move.pieceMoved[1] == 'K' and
         #print(move.isCastleMove)
         if move.isCastleMove:
-            #if move.endCol == self.queenRookPosition:  # Queen side castle
-            if move.endCol < move.startCol:
+            # Queen side castle
+            if (move.endCol < move.startCol) or move.isUniqueCastleMove:
                 self.board[move.startRow][move.startCol] = '--'
                 self.board[move.endRow][self.queenRookPosition] = '--'
                 self.board[move.endRow][2] = move.pieceMoved 
-                #self.board[move.endRow][move.endCol + 1] = move.pieceMoved[0] + 'R'
                 self.board[move.endRow][3] = move.pieceMoved[0] + 'R'
             else:  # King side castle
                 self.board[move.startRow][move.startCol] = '--'
                 self.board[move.endRow][self.kingRookPosition] = '--'
                 self.board[move.endRow][8] = move.pieceMoved 
-                #self.board[move.endRow][move.endCol - 1] = move.pieceMoved[0] + 'R'
                 self.board[move.endRow][7] = move.pieceMoved[0] + 'R'
+
             self.moveLog.append(move)
+        
         # Update 7. Castling Rights
         self.updateCastlingRights(move)
         newCastleRights = CastleRights(self.currentCastlingRights.wks, self.currentCastlingRights.wqs,
@@ -245,17 +247,15 @@ class GameState:
                 self.board[move.endRow][7] = move.pieceMoved[0] + 'R'"""
         if move.isCastleMove:
             #if move.endCol == self.queenRookPosition:  # Queen side castle
-            if move.endCol < move.startCol:
+            if (move.endCol < move.startCol) or move.isUniqueCastleMove:
                 self.board[move.endRow][move.endCol] = '--'
                 self.board[move.endRow][3] = '--'
-                self.board[move.startRow][self.kingPosition] = move.pieceMoved 
-                #self.board[move.endRow][move.endCol + 1] = move.pieceMoved[0] + 'R'
+                self.board[move.endRow][self.kingPosition] = move.pieceMoved[0] + 'K'
                 self.board[move.endRow][self.queenRookPosition] = move.pieceMoved[0] + 'R'
             else:  # King side castle
                 self.board[move.endRow][move.endCol] = '--'
                 self.board[move.endRow][7] = '--'
-                self.board[move.startRow][self.kingPosition] = move.pieceMoved 
-                #self.board[move.endRow][move.endCol - 1] = move.pieceMoved[0] + 'R'
+                self.board[move.endRow][self.kingPosition] = move.pieceMoved[0] + 'K' 
                 self.board[move.endRow][self.kingRookPosition] = move.pieceMoved[0] + 'R'
         
     '''
@@ -534,13 +534,9 @@ class GameState:
             else:
                 castlePermission = False
                 break
-        if c == 7:
-            if (self.board[r][8] == '--') or (self.board[r][8][1] == 'R'):
-                # If the king is on the Rook square after castling (Column 8) then let the king castle if .. 
-                # the square is empty or there is a rook on there
-                castlePermission == True
+
         if c == 8:
-            if (self.board[r][7] == '--') and (self.board[r][9][1] == 'R'):
+            if (self.board[r][7] == '--') and not self.isUnderAttack(r, 7):
                 # If the King is on the Castle Square (Column 9) then allow rook to move to column 7
                 # This imitates castling movement
                 moves.append(Move((r, 9), (r, 7), self.board))
@@ -553,62 +549,37 @@ class GameState:
                 moves.append(Move((r, c), (r, c + 3), self.board, isCastleMove=True))
         """
     def getQueenSideCastleMoves(self, r, c, moves):
-        """
-        if self.board[r][c - 1] == '--' and self.board[r][c - 2] == '--' and self.board[r][c - 3] == '--' and self.board[r][c - 4] == '--':
-            if not self.isUnderAttack(r, c - 1) and not self.isUnderAttack(r, c - 2) and not self.isUnderAttack(r, c - 3):
-                moves.append(Move((r, c), (r, c - 3), self.board, isCastleMove=True))
-        """
-        """
-        castlePermission = False
-        if c > 2:
-            difference = abs(c - 2)
-            for i in range(1, difference + 1):
-                if ((self.board[r][c - i] == '--') or (self.board[r][c - i][1] == 'R')) and not self.isUnderAttack(r, c - i):
-                    castlePermission = True
-                elif difference == 0 and self.board[r][c + 1] == '--':
-                    castlePermission = True
-                else:
-                    castlePermission = False
-                    break
-        elif c == 3:
-            if (self.board[r][2] == '--') or (self.board[r][2][1] == 'R'):
-                castlePermission = True
-        #else: 
-            #if (self.board[r][c + 1] == '--' and not self.isUnderAttack(r, c + 1)):
-               #castlePermission = True
-        
-        if castlePermission and self.board[r][0][1] == 'R':
-            if self.board[r][1] != '__':
-                castlePermission = False
 
-        if castlePermission == True:
-            moves.append(Move((r, c), (r, 2), self.board, isCastleMove=True))
-        """
         castlePermission = False
+        row = self.board[r]
 
         if c > 2:
             difference = abs(c - 2)
             for i in range(1, difference + 1):
-                if (self.board[r][c - i] == '--' or self.board[r][c - i][1] == 'R') and not self.isUnderAttack(r, c - i):
+                if (row[c - i] == '--' or row[c - i][1] == 'R') and not self.isUnderAttack(r, c - i):
                     castlePermission = True
                 else:
                     castlePermission = False
                     break
 
-        if c == 3:
-            if self.board[r][2] == '--' or self.board[r][2][1] == 'R':
-                castlePermission = True
-
-        if c == 2:
-            if self.board[r][3] == '--':
-                if self.board[r][1][1] == 'R': 
+        elif c == 2:
+            if row[3] == '--' and not self.isUnderAttack(r, 1):
+                if row[1][1] == 'R': 
                     moves.append(Move((r, 1), (r, 3), self.board))
-                elif self.board[r][1] == '--':
+
+                elif row[1] == '--':
                     moves.append(Move((r, 0), (r, 3), self.board))
 
-        if castlePermission and self.board[r][0][1] == 'R':
-            if self.board[r][1] != '--':
+        elif c == 1:
+            #This is the unique situation for castling mentioned in the final report
+            if (row[2] == '--' and not self.isUnderAttack(r, 2)):
+                if (row[3] == '--' and not self.isUnderAttack(r, 3)):
+                    moves.append(Move((r, c), (r, 2), self.board, isCastleMove=True, isUniqueCastleMove=True))
+        
+        if castlePermission and row[0][1] == 'R':
+            if row[1] != '--':
                 castlePermission = False
+
 
         if castlePermission:
             moves.append(Move((r, c), (r, 2), self.board, isCastleMove=True))
@@ -644,7 +615,7 @@ class Move:
                    "i": 8, "j":9}
     colsToFiles = {v: k for k, v in filesToCols.items()}
 
-    def __init__(self, startSq, endSq, board, isEnPassantMove=False, isCastleMove=False):
+    def __init__(self, startSq, endSq, board, isEnPassantMove=False, isCastleMove=False, isUniqueCastleMove=False):
         self.startRow = startSq[0]
         self.startCol = startSq[1]
         self.endRow = endSq[0]
@@ -662,6 +633,7 @@ class Move:
 
         # CastleMove
         self.isCastleMove = isCastleMove
+        self.isUniqueCastleMove = isUniqueCastleMove
 
         self.moveId = self.startRow * 1000 + self.startCol * 100 + self.endRow * 10 + self.endCol
 

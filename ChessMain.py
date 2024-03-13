@@ -134,7 +134,7 @@ def main():
 
 		# AI Move finder logic
 		if not gameOver and not humanTurn:
-			AIMove = MediumBot.findBestMove(gs)
+			AIMove = MediumBot.findBestMove(gs, validMoves)
 
 			if AIMove is None:
 				AIMove = MediumBot.randomMove(validMoves)
