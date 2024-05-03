@@ -2,9 +2,8 @@ import random
 from timeit import default_timer as timer
 
 
-DEPTH = 4
+DEPTH = 3
 PIECE_VALUES = {'P': 10, 'N': 30, 'B': 30, 'R':50, 'A': 70, 'C': 80, 'Q': 90, 'K': 1000}
-CHECKMATE = 1000
 STALEMATE = 0 
 
 def randomMove(validMoves):
@@ -67,37 +66,15 @@ def quiesce(gs, alpha, beta):
         alpha = standPat
     pass
 
-def negaMax(gs, depth, alpha, beta, turnColor):
-    if depth == 0:
-        return turnColor * evaluatePosition(gs)
-    bestScore = -10000
-    global bestMove
-    bestMove = None
-
-    for move in gs.getValidMoves():
-        gs.makeMove(move)
-        score = -negaMax(gs, depth - 1, -beta, -alpha, -turnColor)
-        gs.undoMove()
-        """if score >= beta:
-            return score"""
-        if score > bestScore:
-            bestScore = score
-            bestMove = move
-        alpha = max(alpha, bestScore)
-        if alpha >= beta:
-            break
-
-    return bestScore
 
 
 def boardScore(gs):
     if gs.checkMate:
         if gs.whiteToMove:
-            return -CHECKMATE   # BLACK WINS
+            return -1000   # BLACK WINS
         else:
-            return CHECKMATE
-    if gs.staleMate:
-        return STALEMATE
+            return 1000
+        
     score = 0
     for row in gs.board:
         for square in row:
@@ -132,18 +109,16 @@ def findMoveNegaMaxAlphaBetaPruning(gs, validMoves, depth, alpha, beta, turnMult
 def negaMax(gs, depth, alpha, beta, turnMultiplier):
     if depth == 0:
         return None, turnMultiplier * boardScore(gs)
-        #return evaluatePosition2(gs, maximizingPlayer, gs.whiteToMove)
-    if (len(gs.getValidMoves()) != len(orderMoves(gs.getValidMoves()))):
+        
+    moveOrder = orderMoves(gs.getValidMoves())
+    if (len(gs.getValidMoves()) != len(moveOrder)):
         print("hey")
     bestMove = None
 
-    maxScore = -CHECKMATE
-    for move in gs.getValidMoves():
+    maxScore = -1000
+    for move in moveOrder:
         gs.makeMove(move)
-        """if gs.checkMate and depth == DEPTH:
-            return move"""
         score = -negaMax(gs, depth - 1, -beta, -alpha, -turnMultiplier)[1]
-        #allScores.append(score)
         if score > maxScore:
             maxScore = score
             if depth == DEPTH:
@@ -156,22 +131,20 @@ def negaMax(gs, depth, alpha, beta, turnMultiplier):
 
     return bestMove, maxScore
 
-def miniMax(gs, depth, alpha, beta, maximizingPlayer, turnMultiplier):
+def miniMax(gs, depth, alpha, beta, maximizingPlayer, colorToMove):
     if depth == 0:
-        return None, turnMultiplier * boardScore(gs)
-        #return evaluatePosition2(gs, maximizingPlayer, gs.whiteToMove)
+        return None, colorToMove * boardScore(gs)
     
-    moveOrder = orderMoves(gs.getValidMoves())
+    #moveOrder = orderMoves(gs.getValidMoves())
+    moveOrder = gs.getValidMoves()
     bestMove = None
 
     if maximizingPlayer:
-        maxScore = -CHECKMATE
+        maxScore = -1000
         for move in moveOrder:
             gs.makeMove(move)
-            """if gs.checkMate and depth == DEPTH:
-                return move"""
-            score = miniMax(gs, depth - 1, alpha, beta, False, -turnMultiplier)[1]
-            #allScores.append(score)
+            score = miniMax(gs, depth - 1, alpha, beta, False, -colorToMove)[1]
+
             if score > maxScore:
                 maxScore = score
                 if depth == DEPTH:
@@ -184,13 +157,11 @@ def miniMax(gs, depth, alpha, beta, maximizingPlayer, turnMultiplier):
 
         return bestMove, maxScore
     else:
-        minScore = CHECKMATE
+        minScore = 1000
         for move in moveOrder:
             gs.makeMove(move)
-            """if gs.checkMate and depth == DEPTH:
-                return move"""
-            score = miniMax(gs, depth - 1, alpha, beta, True, turnMultiplier)[1]
-            #allScores.append(score)
+            score = miniMax(gs, depth - 1, alpha, beta, True, colorToMove)[1]
+
             if score < minScore:
                 minScore = score
                 if depth == DEPTH:
@@ -203,15 +174,17 @@ def miniMax(gs, depth, alpha, beta, maximizingPlayer, turnMultiplier):
 
         return bestMove, minScore
 
-def findBestMove(gs, validMoves):
+def findBestMove(gs):
     
     nextMove = None
     allScores = []
     start = timer()
-    #nextMove, score = negaMax(gs, DEPTH, -CHECKMATE,  CHECKMATE, 1 if gs.whiteToMove else -1)
-    nextMove, score = miniMax(gs, DEPTH, -CHECKMATE,  CHECKMATE, True, 1 if gs.whiteToMove else -1)
+    nextMove, score = negaMax(gs, DEPTH, -1000,  1000, 1 if gs.whiteToMove else -1)
+    #nextMove, score = miniMax(gs, DEPTH, -1000,  1000, True, 1 if gs.whiteToMove else -1)
     end = timer()
-    print(end-start)
+    print("")
+    print("Execution Time", round(end-start, 2), "seconds")
+    print("")
     return nextMove
     """
     start = timer()

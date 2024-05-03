@@ -6,12 +6,12 @@ This is our main driver file. It will be responsible for
 #Working with arguments to see which algorithm to use for the Chess Engine -> Basic, Advances;
 import sys
 import pygame as p
-if len(sys.argv) > 1 and (sys.argv[1]).lower() == 'adv':
-	import ChessEngineAd as ChessEngine
-else:
-	import ChessEngine
-import ChessBot
+import ChessEngine
+import EasyBot
 import MediumBot
+import HardBot
+from Button import Button
+
 p.init()
 
 WIDTH = 1000
@@ -23,9 +23,9 @@ SQ_SIZE_HEIGHT = HEIGHT // DIMENTION_HEIGHT
 MAX_FPS = 15
 IMAGES = {}
 
-WHITE_BUTTON = p.image.load("assets/images/white.png")
-BLACK_BUTTON = p.image.load("assets/images/black.png")
- 
+DIFFICULTY = ""
+PLAYER_NUMBERS = 1
+
 '''
 Initialise the global dictionary of images. This will be called exactly once in the main
 '''
@@ -34,29 +34,153 @@ def loadImages():
 	for piece in pieces:
 		IMAGES[piece] = p.transform.scale(p.image.load("assets/images/" + piece + ".png"), (SQ_SIZE_WIDTH, SQ_SIZE_HEIGHT))
 	# Note: We can access a piece by saying IMAGES['wP'] -> will give white pawn; 
-"""
-def displayMenu(screen):
-	
-	screen.blit(WHITE_BUTTON, (250, 50))
-	screen.blit(BLACK_BUTTON, (250, 250))
 
-def checkButtonClick(pos, buttonName):
-	button = None
-	if buttonName == WHITE_BUTTON:
-		button = buttonName.get_rect(topleft = (250, 50)) 
-	else:
-		button = buttonName.get_rect(topleft = (250, 250))
-	return button.collidepoint(pos)
+def menuOne(screen):
+	bg = p.image.load("assets/images/StarsBackground.png")
+	bg2 = p.image.load("assets/images/ChessBackground.png")
+	while True:
 
-"""
+		screen.fill("grey")
+		screen.blit(bg, (0,0))
+
+		MENU_MOUSE_POS = p.mouse.get_pos()
+
+		BUTTON_ONE = Button(p.image.load("assets/buttons/StarWarsButton.png"), (500, 250))
+		BUTTON_TWO = Button(p.image.load("assets/buttons/TraditionalButton.png"), (500, 550))
+
+		#SCREEN.blit(MENU_TEXT, MENU_RECT)
+		BUTTON_ONE.update(screen)
+		BUTTON_TWO.update(screen)
+
+		for event in p.event.get():
+			if event.type == p.QUIT:
+				p.quit()
+				sys.exit()
+			if event.type == p.MOUSEBUTTONDOWN:
+				if BUTTON_ONE.checkForInput(MENU_MOUSE_POS):
+					optionsSelected, difficulty, playerColour = menuTwo(screen, bg)
+					return optionsSelected, difficulty, playerColour
+				if BUTTON_TWO.checkForInput(MENU_MOUSE_POS):
+					optionsSelected, difficulty, playerColour = menuTwo(screen, bg2)
+					return optionsSelected, difficulty, playerColour
+				
+		p.display.update()
+
+def menuTwo(screen, bg):
+
+	while True:
+
+		screen.fill("grey")
+		if bg != None:
+			screen.blit(bg, (0,0))
+
+		MENU_MOUSE_POS = p.mouse.get_pos()
+
+		BUTTON_ONE = Button(p.image.load("assets/buttons/OnePlayer.png"), (500, 250))
+		BUTTON_TWO = Button(p.image.load("assets/buttons/TwoPlayer.png"), (500, 550))
+
+		#SCREEN.blit(MENU_TEXT, MENU_RECT)
+		BUTTON_ONE.update(screen)
+		BUTTON_TWO.update(screen)
+
+		for event in p.event.get():
+			if event.type == p.QUIT:
+				p.quit()
+				sys.exit()
+			if event.type == p.MOUSEBUTTONDOWN:
+				if BUTTON_ONE.checkForInput(MENU_MOUSE_POS):
+					optionsSelected, difficulty, playerColour = menuThree(screen, bg)
+					return optionsSelected, difficulty, playerColour
+				
+				if BUTTON_TWO.checkForInput(MENU_MOUSE_POS):
+					# Returning None as a two player game does not have an AI.
+					# Also, the players would decide between themselves who is playing what colour
+					# so the colour menu does not need to be shown.
+					return True, None, None
+				
+		p.display.update()
+
+def menuThree(screen, bg):
+
+	while True:
+
+		screen.fill("grey")
+		if bg != None:
+			screen.blit(bg, (0,0))
+
+		MENU_MOUSE_POS = p.mouse.get_pos()
+
+		BUTTON_ONE = Button(p.image.load("assets/buttons/BlackButton.png"), (500, 250))
+		BUTTON_TWO = Button(p.image.load("assets/buttons/WhiteButton.png"), (500, 550))
+
+		#SCREEN.blit(MENU_TEXT, MENU_RECT)
+		BUTTON_ONE.update(screen)
+		BUTTON_TWO.update(screen)
+
+		for event in p.event.get():
+			if event.type == p.QUIT:
+				p.quit()
+				sys.exit()
+			if event.type == p.MOUSEBUTTONDOWN:
+				if BUTTON_ONE.checkForInput(MENU_MOUSE_POS):
+					optionsSelected, difficulty = menuFour(screen, bg)
+					playerColour = False
+					return optionsSelected, difficulty, playerColour
+				
+				if BUTTON_TWO.checkForInput(MENU_MOUSE_POS):
+					optionsSelected, difficulty = menuFour(screen, bg)
+					playerColour = True
+					return optionsSelected, difficulty, playerColour
+
+		p.display.update()
+
+def menuFour(screen, bg):
+
+	while True:
+
+		screen.fill("grey")
+		if bg != None:
+			screen.blit(bg, (0,0))
+
+		MENU_MOUSE_POS = p.mouse.get_pos()
+
+		BUTTON_ONE = Button(p.image.load("assets/buttons/EasyButton.png"), (500, 150))
+		BUTTON_TWO = Button(p.image.load("assets/buttons/MediumButton.png"), (500, 400))
+		BUTTON_Three = Button(p.image.load("assets/buttons/HardButton.png"), (500, 650))
+
+		#SCREEN.blit(MENU_TEXT, MENU_RECT)
+
+		for button in [BUTTON_ONE, BUTTON_TWO, BUTTON_Three]:
+			button.update(screen)
+
+		for event in p.event.get():
+			if event.type == p.QUIT:
+				p.quit()
+				sys.exit()
+			if event.type == p.MOUSEBUTTONDOWN:
+				if BUTTON_ONE.checkForInput(MENU_MOUSE_POS):
+					return True, "E"
+				if BUTTON_TWO.checkForInput(MENU_MOUSE_POS):
+					return True, "M"
+				if BUTTON_Three.checkForInput(MENU_MOUSE_POS):
+					return True, "H"
+					
+		p.display.update()
+
 
 '''
 This will be out main driver. It will handle user input and update the graphics.
 '''
 def main():
+
 	screen = p.display.set_mode((WIDTH, HEIGHT))
 	clock = p.time.Clock()
 	screen.fill(p.Color('white'))
+	optionsSelected = False
+	
+	while not optionsSelected:
+		optionsSelected, difficulty, playerColour = menuOne(screen)
+
 	gs = ChessEngine.GameState()
 	validMoves = gs.getValidMoves()		# get a list of valid moves.
 	moveMade = False		 			# to check if the user made a move. If true recalculate validMoves.
@@ -68,27 +192,26 @@ def main():
 	playerOne = True					# if Human is playing white -> this will be true
 	playerTwo = False					# if Human is playing black -> this will be true
 	gameOver = False					# True in case of Checkmate and Stalemate
-	"""
-	showMenu = True
-	while showMenu:
-		screen.fill(p.Color(112,128,144))
-		displayMenu(screen)
-		for e in p.event.get():
-			if e.type == p.QUIT:
-				showMenu = False
-			elif e.type == p.MOUSEBUTTONDOWN:
-				pos = p.mouse.get_pos()
-				if checkButtonClick(pos, WHITE_BUTTON):
-					showMenu = False
-				elif checkButtonClick(pos, BLACK_BUTTON):
-					showMenu = False
-	"""
+	numMoves = 0
+	lastFourMoves = []
+	AIMove = None
+
+
 	while running:
-		"""print("")
-		print("For depth 4 the total moves are: ", ChessBot.MoveGenerationTest(gs, 4))
-		print("")
-		running = False"""
-		humanTurn = not (gs.whiteToMove ^ playerOne)
+
+		"""
+		> if diff is none (2 player)
+			> human turn is always true
+		> if 1 player
+			> human turn is true if white, else black
+		
+		"""
+		if difficulty == None:
+			humanTurn = True
+		else:
+			humanTurn = playerColour 
+		
+		print("humanTurn", humanTurn)
 		for e in p.event.get():
 			if e.type == p.QUIT:
 				running = False
@@ -106,7 +229,6 @@ def main():
 						playerClicks.append(sqSelected)	 # append for both 1st and 2nd click
 						if len(playerClicks) == 2: 	# when 2nd click
 							move = ChessEngine.Move(playerClicks[0],playerClicks[1], gs.board)
-							
 							for i in range(len(validMoves)):
 
 								if move == validMoves[i]:
@@ -115,6 +237,8 @@ def main():
 									animate = True
 									playerClicks = [] 	# reset platerClicks
 									sqSelected = () 	# reset user clicks
+
+									numMoves += 1
 							if not moveMade:
 								playerClicks = [sqSelected]
 
@@ -133,16 +257,49 @@ def main():
 					validMoves = gs.getValidMoves()
 
 		# AI Move finder logic
-		if not gameOver and not humanTurn:
-			AIMove = MediumBot.findBestMove(gs, validMoves)
+		if not gameOver:
+			if not humanTurn:
+				if difficulty == "E":
+					AIMove = EasyBot.findBestMove(gs)
+				elif difficulty == "M":
+					AIMove = MediumBot.findBestMove(gs)
+				else:
+					AIMove = HardBot.findBestMove(gs)
 
+				if AIMove is None:
+					AIMove = MediumBot.randomMove(validMoves)
+				gs.makeMove(AIMove)
+
+				moveMade = True
+				animate = True
+				"""
+			
+		if not gameOver and not humanTurn :
+			
+			AIMove = HardBot.findBestMove(gs)"""
+			"""
 			if AIMove is None:
 				AIMove = MediumBot.randomMove(validMoves)
+			
+			if len(lastFourMoves) < 4:
+				lastFourMoves.append(gs.board)
+			elif lastFourMoves[0] == "h":
+				AIMove = MediumBot.randomMove(validMoves)
+				lastFourMoves = []
+			elif (lastFourMoves[0] == lastFourMoves[2]) and (lastFourMoves[1] == lastFourMoves[3]):
+				AIMove = MediumBot.randomMove(validMoves)
+				lastFourMoves = ["h"]
+			else:
+				lastFourMoves = []
+
 			gs.makeMove(AIMove)
-			moveMade = True
-			animate = True
+
+			numMoves += 1
+			"""
+			
 
 		if moveMade:
+			playerColour = not playerColour
 			if len(gs.moveLog) > 0 and animate:
 				animate = False
 				animateMove(gs.moveLog[-1], screen, gs.board, clock)
@@ -152,6 +309,7 @@ def main():
 
 		if gs.checkMate:
 			gameOver = True
+
 			if gs.whiteToMove:
 				drawText(screen, "Black Won by Checkmate!");
 			else:
